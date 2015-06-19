@@ -1,0 +1,165 @@
+﻿{% load staticfiles %}
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+<title>课程详情</title>
+<link href="{% static 'course/css/bootstrap.css' %}" rel='stylesheet' type='text/css' />
+<link rel="stylesheet" href="{% static 'course/css/font-awesome.min.css' %}">
+<script src="{% static 'course/js/jquery.min.js' %}"></script>
+<link href="{% static 'course/css/style.css' %}" rel='stylesheet' type='text/css' />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+<script>
+	function addComment() {
+        var csrf = $("#csrf").children().first().val();
+        var review_text = $("#add_comm").val()
+     	$.ajax({
+
+                    url: "{% url 'course:addReview' %}",
+                    type: "POST",
+                    async: false,
+                    dataType: 'json',
+                  error: function(XmlHttpRequest,textStatus, errorThrown) {
+                    var errMsg = XmlHttpRequest.responseText;
+                    alert(errMsg);
+                  },
+
+                    success: function (data) {
+                        var username = data.username;
+                        var pub_date = data.pub_date;
+                        var review_text = data.review_text;
+
+                        var bb = ' <div class="blog_grid">\
+        <ul class="links">\
+          <li><i class="fa fa-calendar"></i> '+pub_date+'</li> <!--发布时间-->\
+          <li><i class="fa fa-user"></i> <a href="#">'+ username +'</a></li> <!--任课老师-->\
+          <li class="last"><i class="fa fa-comments"></i> <a href="#">0</a></li> <!--评论数量-->\
+		  <li class="last"><i class="glyphicon glyphicon-thumbs-up"></i> <a href="#">0</a></li> <!--点赞数量-->\
+        </ul>\
+        <p>\
+	        ' + review_text + '\
+        </p>\
+		</div>'
+
+                        $("#commentlist").append(bb);
+                    },
+                    data: {
+                        'csrfmiddlewaretoken':csrf,
+                        'course_id':{{ course.id }},
+                        'review_text':review_text,
+                    }
+                }
+		);
+	}
+</script>
+<link href='http://fonts.useso.com/css?family=Source+Sans+Pro:200,300,400,600,700,900' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<div class="header">
+  <div class="container">
+    <div class="logo"> <a href="index.html"><img src="{% static 'course/images/logo.png' %}" alt="Nova"></a> </div>
+    <div class="menu"> <a class="toggleMenu" href="#"><img src="{% static 'course/images/nav_icon.png' %}" alt="" /> </a>
+      <ul class="nav" id="nav">
+        <li
+                {% if course_type == 0 %} class="current"{% endif %}
+                >
+            <a href="{% url 'course:listType' 0 %}">公必</a>
+        </li>
+        <li
+                {% if course_type == 1 %} class="current"{% endif %}
+
+                >
+            <a href="{% url 'course:listType' 1 %}">公选</a>
+        </li>
+        <li
+                {% if course_type == 2 %} class="current"{% endif %}
+                >
+            <a href="{% url 'course:listType' 2 %}">专必</a>
+        </li>
+        <li
+                {% if course_type == 3 %} class="current"{% endif %}
+                >
+            <a href="{% url 'course:listType' 3 %}">专选</a>
+        </li>
+		<li>
+            <a href="{% url 'course:bye' %}">退出</a>
+        </li>
+        <div class="clear"></div>
+      </ul>
+      <script type="text/javascript" src="{% static 'course/js/responsive-nav.js' %}"></script>
+    </div>
+    <div class="clearfix"> </div>
+  </div>
+</div>
+<div class="about">
+  <div class="container">
+    <section class="title-section">
+      <h1 class="title-header">{{ course.course_name }}</h1>    <!--后台在这改成对应课程的名字><-->
+    </section>
+  </div>
+</div>
+<div class="contact">
+  <div class="container">
+    <div class="row contact_top">
+      <div class="col-md-8 contact_details">
+        <h5>课程详情:</h5>
+          <div class="contact_address"> <!--后台在这改成对应课程的详情-->
+		    {{ course.course_description }}
+          </div>
+      </div>
+	  <div class="col-md-4 blog_sidebar">
+      <ul class="sidebar">
+        <h3>Categories</h3>
+        <li><a href="#">Lacinia fringilla</a></li>
+        <li><a href="#">Curabitur consequat</a></li>
+        <li><a href="#">Suspendisse</a></li>
+        <li><a href="#">Mirum est</a></li>
+        <li><a href="#">Vivamus efficitur</a></li>
+      </ul>
+    </div>
+    </div>
+	
+	<div class="comments col-md-8" id="commentlist">
+
+        {% for review in course.review_set.all %}
+        <div class="blog_grid">
+        <ul class="links">
+          <li><i class="fa fa-calendar"></i> {{ review.pub_date }}</li> <!--发布时间-->
+          <li><i class="fa fa-user"></i> <a href="#">{{ review.student.name }}</a></li>
+          <li class="last"><i class="fa fa-comments"></i> <a href="#">{{ review.reviewzan_set.count }}</a></li> <!--评论数量-->
+		  <li class="last"><i class="glyphicon glyphicon-thumbs-up"></i> <a href="#">{{ review.reviewzan_set.count }}</a></li> <!--点赞数量-->
+        </ul>
+        <p>
+	        {{ review.review_text }}
+        </p>
+		</div>
+		{% endfor %}
+		
+	</div>
+	
+	
+    <div class="contact_bottom col-md-8">
+      <h3>发表评论</h3>
+      <form method="post" action="contact-post.html">
+          <div id="csrf">
+          {% csrf_token %}
+          </div>
+        <div class="text2" >
+          <textarea id="add_comm" value="Message:" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Message';}">Message..</textarea>
+        </div>
+        <div> <div class="submit" onclick="addComment()">评论</div> </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <div class="footer_bottom">
+    <div class="copy">
+      <p>Copyright &copy; 2015.Company name All rights reserved.<a target="_blank" href="http://sc.chinaz.com/moban/">&#x7F51;&#x9875;&#x6A21;&#x677F;</a></p>
+    </div>
+  </div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,119 @@
+﻿{% load staticfiles %}
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+<title>民间选课</title>
+
+<link href="{% static 'course/css/bootstrap.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'course/css/font-awesome.min.css' %}">
+
+<script src="{% static 'course/js/jquery.min.js' %}"></script>
+<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		$(".scroll").click(function(event){
+			event.preventDefault();
+			$('html,body').animate({scrollTop:$(this.hash).offset().top},1200);
+		});
+	});
+</script>
+<link href="{% static 'course/css/style.css' %}" rel='stylesheet' type='text/css' />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+<link href='http://fonts.useso.com/css?family=Source+Sans+Pro:200,300,400,600,700,900' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<div class="header">
+  <div class="container">
+    <div class="logo"> <a href="{% url 'course:index' %}"><img src="{% static 'course/images/logo.png' %}" alt="Nova"></a> </div>
+    <div class="menu"> <a class="toggleMenu" href="#"><img src="{% static 'course/images/nav_icon.png' %}" alt="" /> </a>
+      <ul class="nav" id="nav">
+        <li class="current"><a href="{% url 'course:index' %}">Home</a></li>
+        <div class="clear"></div>
+      </ul>
+      <script type="text/javascript" src="{% static 'course/js/responsive-nav.js' %}"></script>
+	   <link href="{% static 'course/css/bootstrap.min.css' %}" rel="stylesheet">
+    </div>
+    <div class="clearfix"> </div>
+  </div>
+</div>
+<div class="banner text-center">
+  <div class="container">
+    <div class="banner-info">
+      <h1>吐槽一下</h1>
+      <p>中山大学民间选课参考系统</p>
+      <label class="page-scroll"><a class="banner-btn class scroll" href="#feature"><i class="fa fa-angle-double-down fa-4x"></i></a></label>
+    </div>
+  </div>
+</div>
+<div class="main">
+<div class="content_white">
+  <h2>登录</h2>
+  <p>注意使用本校的学号与姓名</p>
+</div>
+<div class="featured_content" id="feature">
+  <div class="container">
+    <br/>
+       <form class="form-inline col-md-offset-3">
+           <div id="csrf">
+          {% csrf_token %}
+          </div>
+    	<div class="form-group">
+			<input id="username" type="username" class="form-control" id="InputEmail" placeholder="学号,如:12330247">
+		</div>
+		<div class="form-group">
+			<input id="password" type="password" class="form-control" id="InputPassword" placeholder="密码">
+		</div>
+		<div class="checkbox">
+			<label>
+				<input type="checkbox"> Remember me
+			</label>
+		</div>
+	<button id="go" type="button" class="btn btn-default">Sign in</button>
+</form>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer_midle">
+    <div class='container'>
+      </div>
+    </div>
+  </div>
+    <div class="footer_bottom">
+        <div class="copy">
+            <p>Copyright &copy; 2015. All rights reserved.</p>
+        </div>
+    </div>
+</div>
+<script src="{% static 'course/js/bootstrap.min.js' %}"></script>
+<script>
+    $("#go").click(function(){
+        var username = $("#username").val();
+        var password = $("#password").val();
+        var url = "{% url 'course:index' %}";
+        var csrf = $("#csrf").children().first().val();
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                'username':username,
+                'password':password,
+                'csrfmiddlewaretoken':csrf,
+            },
+            dataType: 'json',
+            error: function(XmlHttpRequest,textStatus, errorThrown) {
+                var errMsg = XmlHttpRequest.responseText;
+                alert(errMsg);
+            },
+            success: function (d) {
+                window.location.href = d.url;
+            },
+        });
+    });
+
+</script>
+</body>
+
+</html>

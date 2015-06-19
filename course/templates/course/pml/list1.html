@@ -1,0 +1,139 @@
+{% load staticfiles %}
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+<title>公必</title>
+<link href="{% static 'course/css/bootstrap.css' %}" rel='stylesheet' type='text/css' />
+<link rel="stylesheet" href="{% static 'course/css/font-awesome.min.css' %}">
+<script src="{% static 'course/js/jquery.min.js' %}"></script>
+<link href="{% static 'course/css/style.css' %}" rel='stylesheet' type='text/css' />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/x-javascript">
+    addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); }
+</script>
+<link href='http://fonts.useso.com/css?family=Source+Sans+Pro:200,300,400,600,700,900' rel='stylesheet' type='text/css'>
+
+</head>
+<body>
+
+<div class="header">
+
+  <div class="container">
+    <div class="logo"> <a href="index.html"><img src="{% static 'course/images/logo.png' %}" alt="Nova"></a> </div>
+    <div class="menu"> <a class="toggleMenu" href="#"><img src="{% static 'course/images/nav_icon.png' %}" alt="" /> </a>
+      <ul class="nav" id="nav">
+        <li
+                {% if course_type == '0' %} class="current"{% endif %}
+                >
+            <a href="{% url 'course:listType' 0 %}">公必</a>
+        </li>
+        <li
+                {% if course_type == '1' %} class="current"{% endif %}
+
+                >
+            <a href="{% url 'course:listType' 1 %}">公选</a>
+        </li>
+        <li
+                {% if course_type == '2' %} class="current"{% endif %}
+                >
+            <a href="{% url 'course:listType' 2 %}">专必</a>
+        </li>
+        <li
+                {% if course_type == '3' %} class="current"{% endif %}
+                >
+            <a href="{% url 'course:listType' 3 %}">专选</a>
+        </li>
+		<li>
+            <a href="{% url 'course:bye' %}">退出</a>
+        </li>
+        <div class="clear"></div>
+      </ul>
+      <script type="text/javascript" src="{% static 'course/js/responsive-nav.js' %}"></script>
+    </div>
+    <div class="clearfix"> </div>
+  </div>
+</div>
+
+<div class="about">
+  <div class="container">
+    <section class="title-section">
+      <h1 class="title-header"> 公必课程列表 </h1>
+    </section>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-md-8">
+
+         {% for course in course_list %}
+	  <!-------------------------------------- One Class Begin ------------------------------------------------>
+      <div class="blog_grid">
+        <h2 class="post_title"><a href="{% url 'course:detail' course.id %}">{{  course.course_name  }}</a></h2> <!--课程名称&课程链接-->
+        <!--<a href="#"><img src='images/b1.jpg' class="img-responsive" alt=""/></a>--> <!--课程图片-->
+        <ul class="links">
+          <li><i class="fa fa-user"></i> <a href="#">任课老师: {{ course.teacher.name }}</a></li> <!--任课老师-->
+          <li class="last"><i class="fa fa-comments"></i> <a href="#">{{ course.review_set.count }}</a></li> <!--评论数量-->
+		  <li class="last"><a href="javascript:void(0);" onclick="alert('bbq')" my-like="test" class="glyphicon glyphicon-thumbs-up bg-danger"></a> <a href="#">like{{ course.coursezan_set.count }}</a></li> <!--点赞数量-->
+        </ul>
+        <p>
+            {{ course.course_description }}
+        </p>
+        <a href="{% url 'course:detail' course.id %}" class="blog_btn">Read more</a>
+	  </div>
+	  <!-------------------------------------- One Class End ------------------------------------------------>
+	    {% endfor %}
+
+      <div class="pagination pagination__posts">
+        <ul>
+          <li class="active"><a href="#">1</a></li>
+          <li><a href="#" class="inactive">2</a></li>
+          <li><a href="#" class="inactive">3</a></li>
+          <li><a href="#" class="inactive">4</a></li>
+          <li class="next"><a href="#">Next</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-4 blog_sidebar">
+	  
+	  <!--热门课程-->
+      <ul class="sidebar">
+        <h3>热门课程</h3> 
+        <li><a href="#">Lacinia fringilla</a></li>  <!--课程名字-->
+        <li><a href="#">Curabitur consequat</a></li>
+        <li><a href="#">Suspendisse</a></li>
+        <li><a href="#">Mirum est</a></li>
+        <li><a href="#">Vivamus efficitur</a></li>
+      </ul>
+	  <!--热门课程结束-->
+
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <div class="footer_midle">
+    <div class='container'>
+    
+    </div>
+  </div>
+  <div class="footer_bottom">
+    <div class="copy">
+      <p>Copyright &copy; 2015. All rights reserved.</p>
+        <ul data-group="Companies">
+  <li data-company="Microsoft">a</li>
+  <li data-company="Google">b</li>
+  <li data-company ="Facebook">c</li>
+</ul>
+    </div>
+  </div>
+</div>
+</body>
+    <script>
+        var zanList = $("[my-like='test']");
+        alert(zanList.length)
+        var ss = $("[data-company='Google']");
+        for (var i = 0; i < zanList.length; i += 1) {
+
+        }
+    </script>
+</html>

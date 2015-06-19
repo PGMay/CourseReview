@@ -1,0 +1,14 @@
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}" />
+
+{% if course_list %}
+    <ul>
+    {% for course in course_list %}
+        <li><a href="{% url 'course:detail' course.id %}">{{ course.course_name }}</a></li>
+        <li>{{ course.course_description }}</li>
+        <br/>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No course are available.</p>
+{% endif %}
