@@ -8,6 +8,7 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse
+from django.db.models import  Count
 
 import  json
 
@@ -34,23 +35,63 @@ def index(request):
             return HttpResponse(u"账号密码错误")
 
     return render(request, 'course/pml/index.html')
-
+@login_required
 def list(request):
     course_list = Course.objects.order_by('-pub_date')
-    context = {'course_list': course_list}
+    user = request.user
+    try:
+        student = Student.objects.get(user=user)
+    except:
+        return HttpResponse('system error')
+    course_list_user = []
+    for i in range(0,len(course_list)):
+        like = course_list[i].coursezan_set.filter(student=student,like=1).count()
+        course_list_user.append([course_list[i],like])
+    getHotCourse()
+    hotCourse = getHotCourse()
+    context = {
+        'course_list': course_list_user,
+        'cc':student,
+        'hotCourse':hotCourse
+    }
     return render(request, 'course/pml/list1.html', context)
 
+def getHotCourse():
+    top_courses = Course.objects.annotate(num_hot=Count('review')).order_by('-num_hot')[:5]
+    return top_courses
 
+
+@login_required
 def listType(request, type):
     course_list = Course.objects.filter(course_type=type).order_by('-pub_date')
-    context = {'course_list': course_list, 'course_type':type}
+    user = request.user
+    try:
+        student = Student.objects.get(user=user)
+    except:
+        return HttpResponse('system error')
+    course_list_user = []
+
+    for course in course_list:
+        like = course.coursezan_set.filter(student=student,like=1).count()
+        course_list_user.append([course, like])
+    hotCourse = getHotCourse()
+    context = {'course_list': course_list_user, 'course_type':type,'hotCourse':hotCourse}
     return render(request, 'course/pml/list1.html', context)
 
 
 @login_required
 def detail(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
-    return render(request, 'course/pml/detail.html', {'course': course})
+    user = request.user
+    try:
+        student = Student.objects.get(user=user)
+    except:
+        return HttpResponse('system error')
+    review_list_user = []
+    for review in course.review_set.all():
+        like = review.reviewzan_set.filter(student=student,like=1).count()
+        review_list_user.append([review,like])
+    return render(request, 'course/pml/detail.html', {'course': course,'reviewList':review_list_user,'hotCourse':getHotCourse()})
 
 @login_required
 def bye(request):
@@ -85,6 +126,7 @@ def addReview(request):
 
     return HttpResponse("nothing")
 
+@login_required
 def courseZan(request):
     if request.is_ajax():
         user = request.user
@@ -95,23 +137,30 @@ def courseZan(request):
 
         course_id = request.POST.get("course_id")
         course = Course.objects.get(pk=course_id)
+        like = request.POST.get('like')
         if course is None:
             return  HttpResponse(u"无效的课程")
 
-        zan = CourseZan.objects.get(course=course,student=student)
+        zanList = CourseZan.objects.filter(course=course,student=student)
 
-        like = request.POST.get('like')
-        if zan is None:
+        if len(zanList) == 0 :
             zan = CourseZan(course=course,student=student,like=like)
             zan.save()
         else:
-            zan.like = like
+            zan = zanList[0]
+            if like == '1':
+                zan.like = True
+            else:
+                zan.like = False
             zan.save()
+
+
+
         return HttpResponse(json.dumps(True),content_type="application/json")
 
     return HttpResponse("")
 
-
+@login_required
 def reviewZan(request):
     if request.is_ajax():
         user = request.user
@@ -122,17 +171,21 @@ def reviewZan(request):
 
         review_id = request.POST.get("review_id")
         review = Review.objects.get(pk=review_id)
+        like = request.POST.get('like')
         if review is None:
             return  HttpResponse(u"无效的评论")
 
-        zan = ReviewZan.objects.get(review=review,student=student)
+        zanList = ReviewZan.objects.filter(review=review,student=student)
 
-        like = request.POST.get('like')
-        if zan is None:
-            zan = CourseZan(review=review,student=student,like=like)
+        if len(zanList) == 0 :
+            zan = ReviewZan(review=review,student=student,like=like)
             zan.save()
         else:
-            zan.like = like
+            zan = zanList[0]
+            if like == '1':
+                zan.like = True
+            else:
+                zan.like = False
             zan.save()
         return HttpResponse(json.dumps(True),content_type="application/json")
 

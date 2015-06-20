@@ -23,6 +23,17 @@
     <div class="logo"> <a href="index.html"><img src="{% static 'course/images/logo.png' %}" alt="Nova"></a> </div>
     <div class="menu"> <a class="toggleMenu" href="#"><img src="{% static 'course/images/nav_icon.png' %}" alt="" /> </a>
       <ul class="nav" id="nav">
+         <li>
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="exampleInputName2"></label>
+                    <input type="text" class="form-control" id="exampleInputName2" placeholder="课程名字">
+                </div>
+
+                <button type="submit" class="btn btn-default">查询</button>
+            </form>
+        </li>
+
         <li
                 {% if course_type == '0' %} class="current"{% endif %}
                 >
@@ -58,7 +69,18 @@
 <div class="about">
   <div class="container">
     <section class="title-section">
-      <h1 class="title-header"> 公必课程列表 </h1>
+        {% if course_type == '0' %}
+        <h1 class="title-header"> 公必课程列表 </h1>
+        {% endif %}
+        {% if course_type == '1' %}
+        <h1 class="title-header"> 公选课程列表 </h1>
+        {% endif %}
+        {% if course_type == '2' %}
+        <h1 class="title-header"> 专必课程列表 </h1>
+        {% endif %}
+        {% if course_type == '3' %}
+        <h1 class="title-header"> 专选课程列表 </h1>
+        {% endif %}
     </section>
   </div>
 </div>
@@ -66,7 +88,7 @@
   <div class="row">
     <div class="col-md-8">
 
-         {% for course in course_list %}
+         {% for course,like in course_list %}
 	  <!-------------------------------------- One Class Begin ------------------------------------------------>
       <div class="blog_grid">
         <h2 class="post_title"><a href="{% url 'course:detail' course.id %}">{{  course.course_name  }}</a></h2> <!--课程名称&课程链接-->
@@ -74,7 +96,14 @@
         <ul class="links">
           <li><i class="fa fa-user"></i> <a href="#">任课老师: {{ course.teacher.name }}</a></li> <!--任课老师-->
           <li class="last"><i class="fa fa-comments"></i> <a href="#">{{ course.review_set.count }}</a></li> <!--评论数量-->
-		  <li class="last"><a href="javascript:void(0);" onclick="alert('bbq')" my-like="test" class="glyphicon glyphicon-thumbs-up bg-danger"></a> <a href="#">like{{ course.coursezan_set.count }}</a></li> <!--点赞数量-->
+          <li class="last">
+              <i my-like="test" my-id="{{ course.id }}"class="glyphicon glyphicon-thumbs-up pointer
+                 {% if like %}
+                    zan
+                 {% endif %}
+              " ></i>
+              <a href="#">{{   course.like_set.count }}</a>
+          </li> <!--点赞数量-->
         </ul>
         <p>
             {{ course.course_description }}
@@ -98,12 +127,10 @@
 	  
 	  <!--热门课程-->
       <ul class="sidebar">
-        <h3>热门课程</h3> 
-        <li><a href="#">Lacinia fringilla</a></li>  <!--课程名字-->
-        <li><a href="#">Curabitur consequat</a></li>
-        <li><a href="#">Suspendisse</a></li>
-        <li><a href="#">Mirum est</a></li>
-        <li><a href="#">Vivamus efficitur</a></li>
+        <h3>热门课程</h3>
+          {% for course in hotCourse %}
+            <li><a href="{% url 'course:detail' course.id %}"> {{ course.course_name }} </a></li>
+          {% endfor %}
       </ul>
 	  <!--热门课程结束-->
 
@@ -119,21 +146,54 @@
   <div class="footer_bottom">
     <div class="copy">
       <p>Copyright &copy; 2015. All rights reserved.</p>
-        <ul data-group="Companies">
-  <li data-company="Microsoft">a</li>
-  <li data-company="Google">b</li>
-  <li data-company ="Facebook">c</li>
-</ul>
     </div>
   </div>
 </div>
+ <div id="csrf">
+          {% csrf_token %}
+          </div>
 </body>
     <script>
         var zanList = $("[my-like='test']");
-        alert(zanList.length)
-        var ss = $("[data-company='Google']");
-        for (var i = 0; i < zanList.length; i += 1) {
-
+        for (var i = 0; i < zanList.length; i++ ) {
+            var zan = $(zanList[i]);
+            zan.click(function(){
+                var like = $(this).hasClass('zan');
+                var course_id = $(this).attr('my-id')
+                if (like) {
+                    like = 0;
+                } else {
+                    like = 1;
+                }
+                var cur = $(this);
+                var csrf = $("#csrf").children().first().val();
+                $.ajax({
+                    url: "{% url 'course:courseZan' %}",
+                    type: "POST",
+                    async: false,
+                    dataType: 'json',
+                    data: {
+                        'csrfmiddlewaretoken':csrf,
+                        'course_id':course_id,
+                        'like':like
+                    },
+                    error: function(XmlHttpRequest,textStatus, errorThrown) {
+                        var errMsg = XmlHttpRequest.responseText;
+                        alert(errMsg);
+                    },
+                    success: function () {
+                        var b = cur.next().html();
+                        b = parseInt(b);
+                        if ( like ) {
+                            cur.addClass('zan');
+                            cur.next().html( b+1);
+                        } else {
+                            cur.removeClass('zan');
+                            cur.next().html(b-1);
+                        }
+                    }
+                });
+            })
         }
     </script>
 </html>

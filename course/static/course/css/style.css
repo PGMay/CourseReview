@@ -965,3 +965,10 @@ input.text {
 	margin-left: 0 !important;
 }
 }
+.pointer {
+	cursor: pointer;
+}
+
+.zan {
+	color: red;
+}

@@ -52,11 +52,21 @@ class Course(models.Model):
     def __unicode__(self):
         return self.course_name
 
+    def like_set(self):
+        return self.coursezan_set.filter(like=1)
+
 class CourseZan(models.Model):
     course = models.ForeignKey(Course)
     student = models.ForeignKey(Student)
     pub_date = models.DateTimeField('date publish', auto_now_add=True, blank=True)
     like = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        if self.like:
+            return self.student.name + " like " + self.course.course_name
+        else:
+            return self.student.name + " no like " + self.course.course_name
+
 
 class Review(models.Model):
     course = models.ForeignKey(Course)
@@ -66,6 +76,9 @@ class Review(models.Model):
 
     def __unicode__(self):
         return self.review_text
+
+    def like_set(self):
+        return self.reviewzan_set.filter(like=1)
 
 
 class ReviewZan(models.Model):
